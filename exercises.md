@@ -7,23 +7,34 @@
 
 ### Exercise 1.1 — Cosine Similarity in Plain Language
 
-No math required — explain conceptually:
+**What does it mean for two text chunks to have high cosine similarity?**
+> Hai vector chỉ về cùng một hướng trong không gian embedding, cho thấy hai đoạn văn bản có sự tương đồng lớn về mặt ngữ nghĩa (semantic relationship).
 
-- What does it mean for two text chunks to have high cosine similarity?
-- Give a concrete example of two sentences that would have HIGH similarity and two that would have LOW similarity.
-- Why is cosine similarity preferred over Euclidean distance for text embeddings?
+**Give a concrete example of two sentences that would have HIGH similarity and two that would have LOW similarity.**
+- **HIGH similarity:**
+    - Sentence A: "Hôm nay trời nắng rất đẹp."
+    - Sentence B: "Thời tiết hôm nay thật rực rỡ và đầy ánh nắng."
+    - *Tại sao tương đồng:* Cùng mô tả một trạng thái thời tiết thuận lợi với các khái niệm tương đồng.
+- **LOW similarity:**
+    - Sentence A: "Lập trình Python rất thú vị."
+    - Sentence B: "Tôi vừa mua một cân táo ở chợ."
+    - *Tại sao khác:* Hai câu thuộc hai chủ đề hoàn toàn khác nhau (công nghệ vs. mua sắm thực phẩm).
 
-> **Ghi kết quả vào:** Report — Section 1 (Warm-up)
+**Why is cosine similarity preferred over Euclidean distance for text embeddings?**
+> Euclidean distance nhạy cảm với độ dài của vector (độ dài văn bản), trong khi cosine similarity chỉ tập trung vào góc giữa các vector (hướng của ý nghĩa), giúp so sánh hiệu quả hơn giữa các tài liệu có độ dài khác nhau.
 
 ---
 
 ### Exercise 1.2 — Chunking Math
 
-- A document is 10,000 characters. You chunk it with `chunk_size=500`, `overlap=50`. How many chunks do you expect?
-- Formula: `num_chunks = ceil((doc_length - overlap) / (chunk_size - overlap))`
-- If overlap is increased to 100, how does this change the chunk count? Why would you want more overlap?
+- **A document is 10,000 characters. You chunk it with `chunk_size=500`, `overlap=50`. How many chunks do you expect?**
+    - phép tính: `ceil((10,000 - 50) / (500 - 50)) = ceil(9950 / 450) = ceil(22.11) = 23`
+    - Đáp án: 23 chunks.
 
-> **Ghi kết quả vào:** Report — Section 1 (Warm-up)
+- **If overlap is increased to 100, how does this change the chunk count? Why would you want more overlap?**
+    - Phép tính: `ceil((10,000 - 100) / (500 - 100)) = ceil(9900 / 400) = ceil(24.75) = 25`
+    - Đáp án: 25 chunks.
+    - Tại sao: Việc tăng overlap giúp duy trì ngữ cảnh giữa các đoạn (context preservation), đảm bảo các thông tin quan trọng không bị cắt rời một cách đột ngột.
 
 ---
 
@@ -36,17 +47,17 @@ Run `pytest tests/` to check progress.
 ### Checklist
 - [x] `Document` dataclass — ĐÃ IMPLEMENT SẴN
 - [x] `FixedSizeChunker` — ĐÃ IMPLEMENT SẴN
-- [ ] `SentenceChunker` — split on sentence boundaries, group into chunks
-- [ ] `RecursiveChunker` — try separators in order, recurse on oversized pieces
-- [ ] `compute_similarity` — cosine similarity formula with zero-magnitude guard
-- [ ] `ChunkingStrategyComparator` — call all three, compute stats
-- [ ] `EmbeddingStore.__init__` — initialize store (in-memory or ChromaDB)
-- [ ] `EmbeddingStore.add_documents` — embed and store each document
-- [ ] `EmbeddingStore.search` — embed query, rank by dot product
-- [ ] `EmbeddingStore.get_collection_size` — return count
-- [ ] `EmbeddingStore.search_with_filter` — filter by metadata, then search
-- [ ] `EmbeddingStore.delete_document` — remove all chunks for a doc_id
-- [ ] `KnowledgeBaseAgent.answer` — retrieve + build prompt + call LLM
+- [x] `SentenceChunker` — split on sentence boundaries, group into chunks
+- [x] `RecursiveChunker` — try separators in order, recurse on oversized pieces
+- [x] `compute_similarity` — cosine similarity formula with zero-magnitude guard
+- [x] `ChunkingStrategyComparator` — call all three, compute stats
+- [x] `EmbeddingStore.__init__` — initialize store (in-memory or ChromaDB)
+- [x] `EmbeddingStore.add_documents` — embed and store each document
+- [x] `EmbeddingStore.search` — embed query, rank by dot product
+- [x] `EmbeddingStore.get_collection_size` — return count
+- [x] `EmbeddingStore.search_with_filter` — filter by metadata, then search
+- [x] `EmbeddingStore.delete_document` — remove all chunks for a doc_id
+- [x] `KnowledgeBaseAgent.answer` — retrieve + build prompt + call LLM
 
 > **Nộp code:** `src/`
 > **Ghi approach vào:** Report — Section 4 (My Approach)
@@ -72,44 +83,43 @@ Ghi vào bảng:
 
 | # | Tên tài liệu | Nguồn | Số ký tự | Metadata đã gán |
 |---|--------------|-------|----------|-----------------|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
+| 1 | book.md | [Wiley Online Library](https://onlinelibrary.wiley.com/doi/book/10.1002/9781394297696) | 503,401 | `{"category": "software-engineering", "source": "book.md"}` |
 
-**Step 3 — Thiết kế metadata schema:** Mỗi tài liệu cần ít nhất 2 trường metadata hữu ích (e.g., `category`, `date`, `source`, `language`, `difficulty`).
-
-> **Ghi kết quả vào:** Report — Section 2 (Document Selection)
+**Step 3 — Thiết kế metadata schema:**
+- `category`: Phân loại chủ đề (e.g., "software-engineering").
+- `source`: Tên file gốc để truy xuất nguồn (e.g., "book.md").
 
 ---
 
 ### Exercise 3.1 — Thiết Kế Retrieval Strategy (Mỗi người thử riêng)
 
-Mỗi thành viên **tự chọn strategy riêng** để thử trên cùng bộ tài liệu nhóm.
-
-**Step 1 — Baseline:** Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu. Ghi kết quả.
+**Step 1 — Baseline:**
+| Strategy | Chunk Count | Avg Length |
+|----------|-------------|------------|
+| FixedSizeChunker | 1119 | 499.82 |
+| SentenceChunker | 1160 | 432.20 |
+| RecursiveChunker | 1398 | 358.47 |
 
 **Step 2 — Chọn hoặc thiết kế strategy của bạn:**
-- Dùng 1 trong 3 built-in strategies với tham số tối ưu, HOẶC
-- Thiết kế custom strategy cho domain (ví dụ: chunk by Q&A pairs, by sections, by headers)
-- Mỗi thành viên nên thử strategy **khác nhau** để có gì so sánh
 
 ```python
-class CustomChunker:
-    """Your custom chunking strategy for [your domain].
-
-    Design rationale: [explain why this strategy fits your data]
+class SoftwareEngineeringChunker(RecursiveChunker):
     """
+    Optimized to keep technical hierarchies (headers) and code blocks together.
+    Design rationale: Ưu tiên các header H1, H2, H3 để giữ các section đi kèm tiêu đề, 
+    bối cảnh nội bộ section được bảo toàn.
+    """
+    SE_SEPARATORS = ["\n# ", "\n## ", "\n### ", "\n\n", "\n", ". ", " ", ""]
 
-    def chunk(self, text: str) -> list[str]:
-        # Your implementation here
-        ...
+    def __init__(self, chunk_size: int = 800, overlap: int = 100) -> None:
+        super().__init__(separators=self.SE_SEPARATORS, chunk_size=chunk_size)
 ```
 
-**Step 3 — So sánh:** Custom/tuned strategy vs baseline trên cùng tài liệu.
-
-> **Ghi kết quả vào:** Report — Section 3 (Chunking Strategy)
+**Step 3 — So sánh:**
+| Tài liệu | Strategy | Chunk Count | Avg Length | Retrieval Quality? |
+|-----------|----------|-------------|------------|--------------------|
+| book.md | RecursiveChunker | 1398 | 358.47 | HIGH |
+| book.md | SoftwareEngineeringChunker | 923 | 543.40 | **HIGH** |
 
 ---
 
@@ -119,59 +129,44 @@ Mỗi nhóm viết **đúng 5 benchmark queries** kèm **gold answers**.
 
 | # | Query | Gold Answer (câu trả lời đúng) | Chunk nào chứa thông tin? |
 |---|-------|-------------------------------|--------------------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-
-**Yêu cầu:**
-- Queries phải đa dạng (không hỏi 5 câu giống nhau)
-- Gold answers phải cụ thể và có thể verify từ tài liệu
-- Ít nhất 1 query yêu cầu metadata filtering để trả lời tốt
-
-> **Ghi kết quả vào:** Report — Section 6 (Results — Benchmark Queries & Gold Answers)
+| 1 | "Core benefits of Information Systems?" | transformation, strategic alignment, efficiency. | Chunks về transformation |
+| 2 | "Governance in IT environments?" | Urbanization, management, and regulatory compliance. | Section 9.1 |
+| 3 | "Explain alignment?" | Convergence between business goals and IT infrastructure. | Section 5.2 |
+| 4 | "Role of a Series Editor?" | Oversight, selection of academic content, quality control. | Metadata/Intro |
+| 5 | "Who is Jean-Charles Pomerol?" | Series Editor and expert mentioned in the book's metadata. | Metadata |
 
 ---
 
 ### Exercise 3.3 — Cosine Similarity Predictions (Cá nhân)
 
-Call `compute_similarity()` on 5 pairs of sentences. **Before running**, predict which pairs will have highest/lowest similarity. Record your predictions and the actual results. Reflect on what surprised you most.
-
-> **Ghi kết quả vào:** Report — Section 5 (Similarity Predictions)
+| Pair | Sentence A | Sentence B | Dự đoán | Actual Score | Đúng? |
+|------|-----------|-----------|---------|--------------|-------|
+| 1 | "Phát triển phần mềm sạch." | "Phát triển phần mềm sạch." | High | 1.0000 | Có |
+| 2 | "SOLID principles are essential." | "Clean code is important." | High | 0.1844 | Không |
+| 3 | "Recursive functions call themselves." | "Functions that invoke itself." | High | -0.2335 | Không |
+| 4 | "Python is a language." | "I love eating chocolate cake." | Low | -0.0482 | Có |
+| 5 | "The server error is 404." | "The cat is on the mat." | Low | -0.0525 | Có |
 
 ---
 
 ### Exercise 3.4 — Chạy Benchmark & So Sánh Trong Nhóm
 
-**Step 1:** Mỗi thành viên chạy 5 benchmark queries với strategy riêng. Ghi kết quả top-3 cho mỗi query.
-
-**Step 2:** So sánh kết quả trong nhóm:
-- Strategy nào cho retrieval tốt nhất? Tại sao?
-- Có query nào mà strategy A tốt hơn B nhưng ngược lại ở query khác?
-- Metadata filtering có giúp ích không?
-
-**Step 3:** Thảo luận và rút ra bài học — chuẩn bị cho phần demo với các nhóm khác.
-
-> **Ghi kết quả vào:** Report — Section 6 (Results)
-> **Gợi ý đánh giá:** xem checklist ngắn trong `README.md` mục **Cách Tự Đánh Giá Kết Quả Retrieval** hoặc chi tiết hơn trong `docs/EVALUATION.md`.
+- **Strategy tốt nhất:** Semantic Chunking (Nguyễn Tuấn Hưng) — 9.5/10.
+- **Lý do:** Giữ trọn vẹn ngữ cảnh của từng mục phức tạp trong SE.
+- **Cải thiện:** SoftwareEngineeringChunker (Lê Minh Hoàng) đạt 8/10, tốt ở việc giữ cấu trúc Markdown nhưng cần cải thiện semantic.
 
 ---
 
 ### Exercise 3.5 — Failure Analysis
 
-Tìm ít nhất **1 failure case** trong quá trình so sánh. Mô tả:
-- Query nào retrieval thất bại?
-- Tại sao? (chunk quá nhỏ/lớn, metadata thiếu, query mơ hồ, v.v.)
-- Đề xuất cải thiện?
-
-> **Ghi kết quả vào:** Report — Section 7 (What I Learned)
-> **Gợi ý:** failure analysis nên tham chiếu các góc nhìn như precision, chunk coherence, metadata utility, và grounding quality.
+- **Query thất bại:** "Role of Editor" hoặc "Who is Pomerol".
+- **Tại sao:** Hệ thống sử dụng `MockEmbedder` dựa trên hashing, dẫn đến việc chỉ nhận diện trùng khớp ký tự mà không hiểu ngữ nghĩa. Các chunk retrieved không chứa đúng thông tin vì query không trùng từ khóa chính xác trong chunk đó.
+- **Đề xuất cải thiện:** Sử dụng mô hình embedding thực thụ (như OpenAI text-embedding-3-small hoặc HuggingFace Sentence-Transformers) và bộ lọc metadata chính xác hơn.
 
 ---
 
 ## Submission Checklist
 
-- [ ] All tests pass: `pytest tests/ -v`
-- [ ] `src/` updated (cá nhân)
-- [ ] Report completed (`report/REPORT.md` — 1 file/sinh viên)
+- [x] All tests pass: `pytest tests/ -v`
+- [x] `src/` updated (cá nhân)
+- [x] Report completed (`report/REPORT.md` — 1 file/sinh viên)
