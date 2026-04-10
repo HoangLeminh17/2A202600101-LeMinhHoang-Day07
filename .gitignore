@@ -17,3 +17,7 @@ __pycache__/
 .omx/
 .venv/
 src_w_solution/
+/src/test.py
+/src/test_store.py
+/src/test_chunking.py
+/src/test_agent.py
